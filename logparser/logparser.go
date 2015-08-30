@@ -11,6 +11,7 @@ func ParseClientInfo(clientInfoAsString string) (map[string]string, error) {
 	names := re.SubexpNames()
 	values := re.FindAllStringSubmatch(clientInfoAsString, -1)
 	if len(values) == 0 {
+		panic(clientInfoAsString)
 		return map[string]string{}, errors.New("Invalid log string")
 	}
 

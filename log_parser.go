@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"flag"
-	"time"
 	"github.com/ivan-uskov/log-parser/textio"
 	"github.com/ivan-uskov/log-parser/logparser"
 	"github.com/ivan-uskov/log-parser/logexport"
@@ -60,15 +59,10 @@ func sendMessage(msg *logexport.MessageCollection){
 
 func main() {
 	parameters := parseFlags()
-	for {
-		fmt.Println("Start sending")
-		ss := initStream(*parameters.ProcessFile)
-		defer ss.Close()
-		msgCollection := logexport.NewMessageCollection(*parameters.Project, *parameters.Host)
+	ss := initStream(*parameters.ProcessFile)
+	defer ss.Close()
+	msgCollection := logexport.NewMessageCollection(*parameters.Project, *parameters.Host)
 
-		parseData(&ss, &msgCollection)
-		sendMessage(&msgCollection)
-		fmt.Println("Sended -> go to sleep")
-		time.Sleep(5000 * time.Millisecond)
-	}
+	parseData(&ss, &msgCollection)
+	sendMessage(&msgCollection)
 }
