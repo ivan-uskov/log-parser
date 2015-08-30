@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"flag"
-	"github.com/ivan-uskov/go-course/log_parser/textio"
-	"github.com/ivan-uskov/go-course/log_parser/logparser"
-	"github.com/ivan-uskov/go-course/log_parser/logexport"
+	"time"
+	"github.com/ivan-uskov/log-parser/textio"
+	"github.com/ivan-uskov/log-parser/logparser"
+	"github.com/ivan-uskov/log-parser/logexport"
 )
 
 type Parameters struct  {
@@ -34,7 +35,7 @@ func initStream(fileName string) textio.StringStream {
 	return ss
 }
 
-func parseData(ss *textio.StringStream, msg *logexport.Message) {
+func parseData(ss *textio.StringStream, msgCollection *logexport.MessageCollection) {
 	var logString string
 	for ss.ReadString(&logString) {
 		ci, err := logparser.ParseClientInfo(logString)
@@ -42,7 +43,7 @@ func parseData(ss *textio.StringStream, msg *logexport.Message) {
 			fmt.Println(err)
 			continue
 		}
-		msg.AddClientInfo(ci)
+		msgCollection.AddClientInfo(ci)
 	}
 
 	if !ss.IsSuccess() {
@@ -50,19 +51,24 @@ func parseData(ss *textio.StringStream, msg *logexport.Message) {
 	}
 }
 
-func sendMessage(msg *logexport.Message){
-	err := msg.Send()
+func sendMessage(msg *logexport.MessageCollection){
+	err := msg.SendAll()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 }
 
 func main() {
 	parameters := parseFlags()
-	ss := initStream(*parameters.ProcessFile)
-	defer ss.Close()
-	msg := logexport.NewMessage(*parameters.Project, *parameters.Host)
+	for {
+		fmt.Println("Start sending")
+		ss := initStream(*parameters.ProcessFile)
+		defer ss.Close()
+		msgCollection := logexport.NewMessageCollection(*parameters.Project, *parameters.Host)
 
-	parseData(&ss, &msg)
-	sendMessage(&msg)
+		parseData(&ss, &msgCollection)
+		sendMessage(&msgCollection)
+		fmt.Println("Sended -> go to sleep")
+		time.Sleep(5000 * time.Millisecond)
+	}
 }

@@ -1,17 +1,17 @@
 package logparser
 
 import (
-	"github.com/ivan-uskov/go-course/log_parser/datastruct"
+	"github.com/mssola/user_agent"
 	"regexp"
 	"errors"
 )
 
-func ParseClientInfo(clientInfoAsString string) (datastruct.ClientInfo, error) {
+func ParseClientInfo(clientInfoAsString string) (map[string]string, error) {
 	re := regexp.MustCompile(REGEX_STRING)
 	names := re.SubexpNames()
 	values := re.FindAllStringSubmatch(clientInfoAsString, -1)
 	if len(values) == 0 {
-		return datastruct.ClientInfo{}, errors.New("Invalid log string")
+		return map[string]string{}, errors.New("Invalid log string")
 	}
 
 	mappedValues := map[string]string{}
@@ -19,13 +19,10 @@ func ParseClientInfo(clientInfoAsString string) (datastruct.ClientInfo, error) {
 		mappedValues[names[key]] = val
 	}
 
-	return createClientInfoFromMap(mappedValues), nil
+	return mappedValues, nil
 }
 
-func createClientInfoFromMap(mappedValues map[string]string) datastruct.ClientInfo {
-	return  datastruct.ClientInfo{
-		Ip: mappedValues[IP_ADDRESS],
-		Date: mappedValues[DATETIME],
-		Browser: mappedValues[USERAGENT],
-	}
+func ParseUserAgent(useragent string) (string, string) {
+	ua := user_agent.New(useragent)
+	return ua.Browser()
 }

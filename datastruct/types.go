@@ -1,12 +1,13 @@
 package datastruct
 
-type ClientInfo struct {
-	Ip string
-	Date string
+type BrowserInfo struct {
 	Browser string
+	Version string
+	Count int
 }
 
 type ExportedData struct {
 	Project string
-	Data []ClientInfo
+	Date string
+	Data []BrowserInfo
 }
